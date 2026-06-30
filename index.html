@@ -2,36 +2,122 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>PIXEL BLASTER: VOID PROTOCOL</title>
 <style>
+  :root {
+    --bg-body:#0d0d1a;
+    --bg-canvas:#0a0a14;
+    --border-main:#4a4a6a;
+    --border-outer:#1a1a2e;
+    --glow:rgba(120,120,255,0.4);
+    --text-main:#fff;
+    --accent:#7fffd4;
+    --accent-glow:#7fffd4;
+    --danger:#ff5577;
+    --muted:#999;
+    --panel-bg:#15152a;
+    --panel-bg2:rgba(8,8,16,0.92);
+    --gold:#ffd27f;
+  }
+  body.theme-light {
+    --bg-body:#eef0fb;
+    --bg-canvas:#dde1f5;
+    --border-main:#9aa3d9;
+    --border-outer:#c2c8ee;
+    --glow:rgba(90,90,200,0.25);
+    --text-main:#1a1a2e;
+    --accent:#0f8f73;
+    --accent-glow:#0f8f73;
+    --danger:#c8285a;
+    --muted:#5a5a6e;
+    --panel-bg:#ffffff;
+    --panel-bg2:rgba(238,240,251,0.95);
+    --gold:#a9760c;
+  }
+  body.theme-normal {
+    --bg-body:#11151c;
+    --bg-canvas:#171c26;
+    --border-main:#3a4a5a;
+    --border-outer:#222a33;
+    --glow:rgba(120,180,255,0.25);
+    --text-main:#e8e8ec;
+    --accent:#5fc6e0;
+    --accent-glow:#5fc6e0;
+    --danger:#e0617d;
+    --muted:#8a93a0;
+    --panel-bg:#1b212b;
+    --panel-bg2:rgba(15,18,24,0.94);
+    --gold:#e0b35f;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
   body {
-    background:#0d0d1a;
+    background:var(--bg-body);
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     min-height:100vh;
+    min-height:100dvh;
     font-family:'Courier New', monospace;
-    color:#fff;
+    color:var(--text-main);
+    padding:10px;
+    overflow-x:hidden;
+    overscroll-behavior:none;
+    transition:background 0.2s, color 0.2s;
   }
-  #wrap { position:relative; }
+  #topBar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:min(100%, 480px);
+    margin-bottom:6px;
+    gap:6px;
+  }
+  #topBar .label {
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:1px;
+  }
+  #themeBtns { display:flex; gap:4px; }
+  .themeBtn {
+    font-family:'Courier New', monospace;
+    background:var(--panel-bg);
+    color:var(--text-main);
+    border:1px solid var(--border-main);
+    padding:4px 8px;
+    font-size:9px;
+    letter-spacing:1px;
+    cursor:pointer;
+  }
+  .themeBtn.active { background:var(--accent); color:var(--bg-canvas); }
+  #wrap {
+    position:relative;
+    width:min(100%, 480px);
+  }
   canvas {
-    background:#0a0a14;
+    background:var(--bg-canvas);
     image-rendering: pixelated;
-    border:4px solid #4a4a6a;
-    box-shadow: 0 0 0 4px #1a1a2e, 0 0 20px rgba(120,120,255,0.4);
+    border:4px solid var(--border-main);
+    box-shadow: 0 0 0 4px var(--border-outer), 0 0 20px var(--glow);
     display:block;
+    width:100%;
+    height:auto;
+    max-width:480px;
+    touch-action:none;
   }
   #hud {
     display:flex;
     justify-content:space-between;
-    width:480px;
+    width:min(100%, 480px);
     margin-bottom:8px;
-    font-size:13px;
+    font-size:clamp(10px, 2.4vw, 13px);
     letter-spacing:1px;
-    color:#7fffd4;
-    text-shadow: 0 0 4px #7fffd4;
+    color:var(--accent);
+    text-shadow: 0 0 4px var(--accent-glow);
+    gap:6px;
+    flex-wrap:wrap;
   }
   #bossbar {
     position:absolute;
@@ -39,13 +125,13 @@
     transform:translateX(-50%);
     width:380px;
     height:14px;
-    border:2px solid #ff5577;
+    border:2px solid var(--danger);
     background:#1a0a14;
     display:none;
   }
   #bossbar-fill {
     height:100%;
-    background:#ff5577;
+    background:var(--danger);
     width:100%;
     transition:width 0.15s;
   }
@@ -54,7 +140,7 @@
     top:24px; left:50%;
     transform:translateX(-50%);
     font-size:10px;
-    color:#ff5577;
+    color:var(--danger);
     letter-spacing:2px;
     display:none;
   }
@@ -66,61 +152,272 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    background:rgba(8,8,16,0.92);
+    background:var(--panel-bg2);
     text-align:center;
-    gap:14px;
+    gap:12px;
     padding:20px;
+    overflow-y:auto;
   }
   .hidden { display:none !important; }
-  h1 { font-size:24px; color:#ff5577; text-shadow:0 0 8px #ff5577; letter-spacing:3px; }
-  h2 { font-size:16px; color:#7fffd4; letter-spacing:2px; }
-  p.flavor { font-size:11px; color:#999; line-height:1.6; max-width:400px; }
+  h1 { font-size:24px; color:var(--danger); text-shadow:0 0 8px var(--danger); letter-spacing:3px; }
+  h2 { font-size:16px; color:var(--accent); letter-spacing:2px; }
+  p.flavor { font-size:11px; color:var(--muted); line-height:1.6; max-width:400px; }
   button {
     font-family:'Courier New', monospace;
-    background:#7fffd4;
-    color:#0a0a14;
+    background:var(--accent);
+    color:var(--bg-canvas);
     border:none;
     padding:10px 20px;
     font-size:13px;
     letter-spacing:1px;
     cursor:pointer;
-    box-shadow: 3px 3px 0 #4a4a6a;
+    box-shadow: 3px 3px 0 var(--border-main);
   }
-  button:active { transform:translate(2px,2px); box-shadow: 1px 1px 0 #4a4a6a; }
+  button:active { transform:translate(2px,2px); box-shadow: 1px 1px 0 var(--border-main); }
   button:disabled { background:#555; cursor:not-allowed; opacity:0.6; }
+  button.secondary { background:var(--panel-bg); color:var(--text-main); border:1px solid var(--border-main); }
 
   #dialogueBox {
     position:absolute; bottom:0; left:0; width:100%;
-    background:rgba(8,8,20,0.95);
-    border-top:3px solid #7fffd4;
+    background:var(--panel-bg2);
+    border-top:3px solid var(--accent);
     padding:14px 18px;
     display:none;
     cursor:pointer;
   }
-  #dlgSpeaker { font-size:12px; color:#ffd27f; letter-spacing:2px; margin-bottom:6px; }
-  #dlgText { font-size:12px; color:#fff; line-height:1.7; min-height:40px; }
-  #dlgHint { font-size:9px; color:#666; text-align:right; margin-top:6px; }
+  #dlgSpeaker { font-size:12px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; }
+  #dlgText { font-size:12px; color:var(--text-main); line-height:1.7; min-height:40px; }
+  #dlgHint { font-size:9px; color:var(--muted); text-align:right; margin-top:6px; }
 
   #skillGrid {
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px;
-    width:420px;
+    width:min(100%, 420px);
   }
   .skillCard {
-    border:2px solid #4a4a6a;
-    background:#15152a;
+    border:2px solid var(--border-main);
+    background:var(--panel-bg);
     padding:10px;
     text-align:left;
     font-size:10px;
   }
-  .skillCard h3 { font-size:11px; color:#7fffd4; margin-bottom:4px; letter-spacing:1px; }
-  .skillCard p { color:#999; font-size:9px; margin-bottom:6px; line-height:1.4; }
-  .skillCard .lvl { color:#ffd27f; font-size:9px; margin-bottom:6px; }
+  .skillCard h3 { font-size:11px; color:var(--accent); margin-bottom:4px; letter-spacing:1px; }
+  .skillCard p { color:var(--muted); font-size:9px; margin-bottom:6px; line-height:1.4; }
+  .skillCard .lvl { color:var(--gold); font-size:9px; margin-bottom:6px; }
   .skillCard button { font-size:10px; padding:6px 12px; width:100%; }
+
+  #touchControls {
+    position:absolute;
+    left:0; right:0; bottom:2px;
+    display:none;
+    justify-content:space-between;
+    align-items:flex-end;
+    padding:0 10px;
+    pointer-events:none;
+    z-index:6;
+  }
+  #moveGroup {
+    display:flex;
+    gap:8px;
+    pointer-events:none;
+  }
+  .touchBtn {
+    pointer-events:auto;
+    min-width:60px;
+    padding:14px 14px;
+    border:2px solid rgba(127,255,212,0.45);
+    background:rgba(5,7,18,0.8);
+    color:var(--accent);
+    font-size:12px;
+    letter-spacing:2px;
+    box-shadow:0 0 12px rgba(0,0,0,0.35);
+    touch-action:none;
+    user-select:none;
+  }
+  #shootBtn { min-width:72px; }
+  .touchBtn.active {
+    background:rgba(127,255,212,0.2);
+    transform:translate(1px,1px);
+  }
+
+  #dailyBanner {
+    width:min(100%, 420px);
+    border:2px dashed var(--gold);
+    background:var(--panel-bg);
+    padding:8px 10px;
+    font-size:10px;
+    color:var(--gold);
+    text-align:left;
+    line-height:1.5;
+  }
+  #highScorePanel {
+    width:min(100%, 420px);
+    border:2px solid var(--border-main);
+    background:var(--panel-bg);
+    padding:8px 10px;
+    font-size:10px;
+    text-align:left;
+  }
+  #highScorePanel h3 { font-size:11px; color:var(--accent); margin-bottom:6px; letter-spacing:1px; }
+  #highScorePanel ol { list-style:none; }
+  #highScorePanel li { display:flex; justify-content:space-between; color:var(--muted); padding:2px 0; }
+  #highScorePanel li span.nm { color:var(--text-main); }
+
+  #bossSelectGrid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    width:min(100%, 420px);
+  }
+  .bossOption {
+    border:2px solid var(--border-main);
+    background:var(--panel-bg);
+    padding:8px;
+    font-size:9px;
+    text-align:left;
+    cursor:pointer;
+    color:var(--text-main);
+  }
+  .bossOption b { color:var(--danger); font-size:10px; display:block; margin-bottom:3px; }
+
+  /* ---------- Sidebar / Player Hub ---------- */
+  #sidebarToggle {
+    font-family:'Courier New', monospace;
+    background:var(--panel-bg);
+    color:var(--accent);
+    border:1px solid var(--border-main);
+    padding:4px 10px;
+    font-size:10px;
+    letter-spacing:1px;
+    cursor:pointer;
+  }
+  #sidebarOverlay {
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.5);
+    z-index:50;
+    display:none;
+  }
+  #sidebarOverlay.open { display:block; }
+  #sidebar {
+    position:fixed;
+    top:0; left:0; bottom:0;
+    width:min(86vw, 340px);
+    background:var(--panel-bg);
+    border-right:3px solid var(--accent);
+    z-index:51;
+    transform:translateX(-100%);
+    transition:transform 0.2s;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+    padding:14px;
+    gap:10px;
+  }
+  #sidebar.open { transform:translateX(0); }
+  #sidebar h2 { font-size:14px; }
+  #sidebarClose {
+    align-self:flex-end;
+    background:transparent;
+    color:var(--text-main);
+    border:1px solid var(--border-main);
+    box-shadow:none;
+    font-size:11px;
+    padding:4px 10px;
+  }
+  #sidebarTabs { display:flex; gap:4px; flex-wrap:wrap; }
+  .sbTab {
+    font-family:'Courier New', monospace;
+    background:var(--bg-canvas);
+    color:var(--muted);
+    border:1px solid var(--border-main);
+    padding:6px 8px;
+    font-size:9px;
+    letter-spacing:1px;
+    cursor:pointer;
+    flex:1;
+  }
+  .sbTab.active { color:var(--accent); border-color:var(--accent); }
+  .sbPane { display:none; flex-direction:column; gap:10px; font-size:10px; }
+  .sbPane.active { display:flex; }
+  #profileNameRow { display:flex; gap:6px; }
+  #profileNameInput {
+    flex:1;
+    font-family:'Courier New', monospace;
+    background:var(--bg-canvas);
+    color:var(--text-main);
+    border:1px solid var(--border-main);
+    padding:8px;
+    font-size:11px;
+  }
+  .profileStat { display:flex; justify-content:space-between; color:var(--muted); padding:3px 0; border-bottom:1px dashed var(--border-main); }
+  .profileStat span.v { color:var(--text-main); }
+  .shopGrid, .invGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .shopItem, .invItem {
+    border:2px solid var(--border-main);
+    background:var(--bg-canvas);
+    padding:8px;
+    text-align:left;
+    font-size:9px;
+  }
+  .shopItem.owned, .invItem.equipped { border-color:var(--accent); }
+  .shopItem b, .invItem b { display:block; font-size:10px; color:var(--text-main); margin-bottom:3px; }
+  .shopItem .swatch, .invItem .swatch { width:100%; height:18px; margin-bottom:5px; border:1px solid var(--border-main); }
+  .shopItem button, .invItem button { width:100%; font-size:9px; padding:5px; margin-top:5px; }
+  #currentLoadout { font-size:9px; color:var(--gold); }
+
+  @media (max-width: 768px) {
+    body { padding:6px; justify-content:flex-start; }
+    .overlay { padding:14px; }
+    #skillGrid, #bossSelectGrid { grid-template-columns:1fr; }
+    #touchControls { display:flex; }
+    #dialogueBox { padding-bottom:86px; }
+    #wrap { width:100%; }
+    canvas { max-width:100%; }
+  }
+
+  /* Landscape phones: shrink chrome, keep canvas as tall as possible, controls flank it */
+  @media (max-width: 900px) and (orientation: landscape) {
+    body { flex-direction:row; align-items:center; justify-content:center; padding:4px; gap:6px; }
+    #topBar { display:none; }
+    #hud {
+      position:absolute;
+      top:2px; left:2px; right:2px;
+      width:auto;
+      margin:0;
+      font-size:9px;
+      z-index:5;
+      background:rgba(0,0,0,0.3);
+      padding:2px 4px;
+    }
+    #wrap {
+      width:auto;
+      height:96vh;
+      height:96dvh;
+    }
+    canvas {
+      width:auto;
+      height:100%;
+      max-width:none;
+      max-height:96vh;
+      max-height:96dvh;
+    }
+    #touchControls { bottom:0px; padding:0 6px; }
+    .touchBtn { min-width:50px; padding:10px 10px; font-size:10px; }
+    #shootBtn { min-width:62px; }
+  }
 </style>
 </head>
-<body>
+<body class="theme-normal">
+  <div id="topBar">
+    <span class="label">DISPLAY MODE</span>
+    <div id="themeBtns">
+      <button class="themeBtn" data-theme="normal">NORMAL</button>
+      <button class="themeBtn" data-theme="dark">DARK</button>
+      <button class="themeBtn" data-theme="light">LIGHT</button>
+    </div>
+  </div>
   <div id="hud">
     <span id="score">SCORE: 0</span>
     <span id="cores">CORES: 0</span>
@@ -129,6 +426,13 @@
   </div>
   <div id="wrap">
     <canvas id="game" width="480" height="560"></canvas>
+    <div id="touchControls">
+      <button id="shootBtn" class="touchBtn">FIRE</button>
+      <div id="moveGroup">
+        <button id="leftBtn" class="touchBtn">◀</button>
+        <button id="rightBtn" class="touchBtn">▶</button>
+      </div>
+    </div>
     <div id="bossbar"><div id="bossbar-fill"></div></div>
     <div id="bossname"></div>
 
@@ -136,8 +440,23 @@
       <h1>PIXEL BLASTER</h1>
       <h2>VOID PROTOCOL</h2>
       <p class="flavor">The Hive collective has overrun the outer colonies. You are RONIN, pilot of the experimental fighter WASP-9. Your AI co-pilot ECHO and Commander Vex are the only allies you have left.</p>
-      <p class="flavor">ARROW KEYS / A-D to move &mdash; SPACE to fire &mdash; B for Overdrive &mdash; P to pause</p>
-      <button id="startBtn">BEGIN MISSION 1</button>
+      <p class="flavor">ARROW KEYS / A-D to move &mdash; SPACE to fire &mdash; B for Overdrive &mdash; P to pause. On mobile, use the on-screen buttons.</p>
+
+      <div id="dailyBanner"></div>
+      <div id="highScorePanel">
+        <h3>TOP PILOTS</h3>
+        <ol id="highScoreList"></ol>
+      </div>
+
+      <button id="startBtn">BEGIN CAMPAIGN</button>
+      <button id="bossRushBtn" class="secondary">BOSS RUSH (PRACTICE)</button>
+    </div>
+
+    <div id="bossSelectOverlay" class="overlay hidden">
+      <h1>BOSS RUSH</h1>
+      <p class="flavor">Choose an enemy commander to fight directly. Skill upgrades are disabled in this mode.</p>
+      <div id="bossSelectGrid"></div>
+      <button id="bossSelectBack" class="secondary">BACK</button>
     </div>
 
     <div id="dialogueBox">
@@ -161,6 +480,7 @@
     <div id="endOverlay" class="overlay hidden">
       <h1 id="endTitle">GAME OVER</h1>
       <p class="flavor" id="endText"></p>
+      <div id="endHighScorePanel" style="width:min(100%,420px);"></div>
       <button id="restartBtn">PLAY AGAIN</button>
     </div>
   </div>
@@ -190,6 +510,8 @@ const els = {
   bossbar: document.getElementById('bossbar'),
   bossbarFill: document.getElementById('bossbar-fill'),
   bossname: document.getElementById('bossname'),
+  bossSelect: document.getElementById('bossSelectOverlay'),
+  bossSelectGrid: document.getElementById('bossSelectGrid'),
 };
 
 function showOnly(name){
@@ -198,14 +520,113 @@ function showOnly(name){
   els.skill.classList.add('hidden');
   els.pause.classList.add('hidden');
   els.end.classList.add('hidden');
+  els.bossSelect.classList.add('hidden');
   if (name === 'start') els.start.classList.remove('hidden');
   if (name === 'dialogue') els.dialogue.style.display = 'block';
   if (name === 'skill') els.skill.classList.remove('hidden');
   if (name === 'pause') els.pause.classList.remove('hidden');
   if (name === 'end') els.end.classList.remove('hidden');
+  if (name === 'bossSelect') els.bossSelect.classList.remove('hidden');
 }
 
+/* ---------- Safe local storage wrapper (falls back to memory) ---------- */
+const memStore = {};
+const storage = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return memStore[k] ?? null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){ memStore[k] = v; } }
+};
+
+/* ---------- Theme handling ---------- */
+function applyTheme(name){
+  document.body.classList.remove('theme-dark','theme-light','theme-normal');
+  document.body.classList.add('theme-' + name);
+  document.querySelectorAll('.themeBtn').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
+  storage.set('pb_theme', name);
+}
+document.querySelectorAll('.themeBtn').forEach(b => {
+  b.addEventListener('click', () => applyTheme(b.dataset.theme));
+});
+applyTheme(storage.get('pb_theme') || 'normal');
+
+/* ---------- High scores ---------- */
+function getHighScores(){
+  try { return JSON.parse(storage.get('pb_highscores') || '[]'); } catch(e){ return []; }
+}
+function saveHighScore(score, label){
+  const list = getHighScores();
+  list.push({ score, label, date: new Date().toLocaleDateString() });
+  list.sort((a,b) => b.score - a.score);
+  const top = list.slice(0,5);
+  storage.set('pb_highscores', JSON.stringify(top));
+  return top;
+}
+function renderHighScores(targetEl){
+  const list = getHighScores();
+  if (!list.length){
+    targetEl.innerHTML = '<li style="justify-content:center;">NO SCORES YET</li>';
+    return;
+  }
+  targetEl.innerHTML = list.map((e,i) => `<li><span class="nm">#${i+1} ${e.label}</span><span>${e.score}</span></li>`).join('');
+}
+renderHighScores(document.getElementById('highScoreList'));
+
+/* ---------- Daily mission ---------- */
+function dailySeedString(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function seededRand(seedStr){
+  let h = 0;
+  for (let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i)) >>> 0; }
+  return () => { h = (h*1664525 + 1013904223) >>> 0; return (h >>> 8) / 16777216; };
+}
+const dailyKey = 'daily_' + dailySeedString();
+const dailyRand = seededRand(dailySeedString());
+const dailyModifiers = [
+  { name:"OVERCLOCKED HIVE", desc:"Enemies move 40% faster. Reward: 2x cores.", speedMul:1.4, coreMul:2 },
+  { name:"GLASS CANNON", desc:"All enemies die in one hit. Reward: 1.5x cores.", speedMul:1.0, coreMul:1.5, oneHit:true },
+  { name:"IRON SWARM", desc:"Enemies take an extra hit. Reward: 2.5x cores.", speedMul:1.0, coreMul:2.5, extraHp:true },
+  { name:"RELENTLESS FIRE", desc:"Enemies fire twice as often. Reward: 2x cores.", speedMul:1.0, coreMul:2, fireMul:2 },
+];
+const dailyMission = dailyModifiers[Math.floor(dailyRand()*dailyModifiers.length)];
+const dailyDone = storage.get(dailyKey) === '1';
+function renderDailyBanner(){
+  const banner = document.getElementById('dailyBanner');
+  banner.innerHTML = `<b>DAILY MISSION — ${dailyMission.name}${dailyDone ? ' (COMPLETE)' : ''}</b><br>${dailyMission.desc}<br>` +
+    `<label style="display:flex;align-items:center;gap:6px;margin-top:4px;">` +
+    `<input type="checkbox" id="dailyToggle" ${dailyDone ? 'disabled' : ''}> ENABLE DAILY MODIFIER FOR NEXT RUN</label>`;
+}
+renderDailyBanner();
+let dailyEnabledForRun = false;
+document.addEventListener('change', e => {
+  if (e.target && e.target.id === 'dailyToggle') dailyEnabledForRun = e.target.checked;
+});
+
 let keys = {};
+let controls = { left:false, right:false, fire:false };
+const touchEnabled = window.matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+
+function setTouchControl(name, value){
+  controls[name] = value;
+  const btn = document.getElementById(name === 'left' ? 'leftBtn' : name === 'right' ? 'rightBtn' : 'shootBtn');
+  if (btn) btn.classList.toggle('active', value);
+}
+
+function bindTouchButton(id, name){
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const start = e => { e.preventDefault(); setTouchControl(name, true); };
+  const end = e => { e.preventDefault(); setTouchControl(name, false); };
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointerleave', end);
+  btn.addEventListener('pointercancel', end);
+}
+
+bindTouchButton('leftBtn', 'left');
+bindTouchButton('rightBtn', 'right');
+bindTouchButton('shootBtn', 'fire');
+
 document.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
   if (e.key === ' ') e.preventDefault();
@@ -310,6 +731,31 @@ const MISSIONS = [
   }
 ];
 
+/* Boss rush option list (built from MISSIONS, practice-only) */
+function renderBossSelect(){
+  els.bossSelectGrid.innerHTML = '';
+  MISSIONS.forEach((m, idx) => {
+    const opt = document.createElement('div');
+    opt.className = 'bossOption';
+    opt.innerHTML = `<b>${m.bossName}</b>MISSION ${idx+1}: ${m.name}<br>HP: ${m.baseHp + idx*4}`;
+    opt.addEventListener('click', () => {
+      totalCores = 0;
+      playerSkills = { rapidfire:0, twincannon:0, shield:0, engine:0, overdrive:0 };
+      els.score.textContent = 'SCORE: 0';
+      els.cores.textContent = 'CORES: 0';
+      els.lives.textContent = 'LIVES: ❤❤❤';
+      game = new Game({ bossRushIndex: idx });
+      if (!loopRunning){ loopRunning = true; requestAnimationFrame(loop); }
+    });
+    els.bossSelectGrid.appendChild(opt);
+  });
+}
+document.getElementById('bossRushBtn').addEventListener('click', () => {
+  renderBossSelect();
+  showOnly('bossSelect');
+});
+document.getElementById('bossSelectBack').addEventListener('click', () => showOnly('start'));
+
 const SKILLS = {
   rapidfire: { name:"RAPID FIRE", desc:"Reduces weapon cooldown each level.", maxLevel:3, cost:lv=>(lv+1)*15 },
   twincannon: { name:"TWIN CANNONS", desc:"Fire additional parallel shots.", maxLevel:2, cost:lv=>(lv+1)*25 },
@@ -362,12 +808,15 @@ class Player {
   get speed(){ return this.baseSpeed + playerSkills.engine * 1.2; }
   get fireCooldown(){ return Math.max(5, 12 - playerSkills.rapidfire * 2); }
   update(){
-    if (keys['arrowleft'] || keys['a']) this.x -= this.speed;
-    if (keys['arrowright'] || keys['d']) this.x += this.speed;
+    const movingLeft = keys['arrowleft'] || keys['a'] || controls.left;
+    const movingRight = keys['arrowright'] || keys['d'] || controls.right;
+    if (movingLeft) this.x -= this.speed;
+    if (movingRight) this.x += this.speed;
     this.x = Math.max(4, Math.min(W - this.w - 4, this.x));
     if (this.cooldown > 0) this.cooldown--;
     if (this.blink > 0) this.blink--;
-    if (keys[' '] && this.cooldown <= 0 && this.alive){
+    const fireHeld = keys[' '] || controls.fire;
+    if (fireHeld && this.cooldown <= 0 && this.alive){
       const shots = 1 + playerSkills.twincannon;
       for (let i=0;i<shots;i++){
         const offset = shots===1?0:(i - (shots-1)/2)*10;
@@ -406,10 +855,10 @@ class Player {
 }
 
 class Enemy {
-  constructor(x,y,type){
+  constructor(x,y,type,extraHp){
     this.x=x; this.y=y; this.w=20; this.h=16;
     this.type = type;
-    this.hp = type===2 ? 2 : 1;
+    this.hp = (type===2 ? 2 : 1) + (extraHp ? 1 : 0);
     this.color = type===2 ? '#ffd27f' : (type===1 ? '#ff8855' : '#c77fff');
   }
   draw(){
@@ -449,7 +898,8 @@ class Boss {
     this.x = W/2 - this.w/2 + Math.sin(this.t/40) * (W/2 - this.w/2 - 10);
     this.fireTimer--;
     if (this.fireTimer <= 0){
-      this.fireTimer = Math.max(18, 45 - Math.floor((1-this.hp/this.maxHp)*25));
+      const fireMul = (game && game.dailyMods.fireMul) || 1;
+      this.fireTimer = Math.max(10, (45 - Math.floor((1-this.hp/this.maxHp)*25)) / fireMul);
       this.fire();
     }
   }
@@ -485,9 +935,12 @@ class Boss {
 }
 
 class Game {
-  constructor(){
+  constructor(opts){
+    opts = opts || {};
+    this.bossRush = typeof opts.bossRushIndex === 'number';
+    this.dailyMods = (dailyEnabledForRun && !this.bossRush) ? dailyMission : {};
     this.state = 'dialogue';
-    this.missionIndex = 0;
+    this.missionIndex = this.bossRush ? opts.bossRushIndex : 0;
     this.player = new Player();
     this.bullets = [];
     this.enemies = [];
@@ -504,7 +957,13 @@ class Game {
     for (let i=0;i<60;i++) this.stars.push({x:Math.random()*W, y:Math.random()*H, s:Math.random()*2+0.5});
     this.dialogueQueue = [];
     this.dialogueCallback = null;
-    this.startMission();
+    if (this.bossRush){
+      this.state = 'playing';
+      els.mission.textContent = 'BOSS RUSH: ' + this.mission.bossName;
+      this.spawnBoss();
+    } else {
+      this.startMission();
+    }
   }
   get mission(){ return MISSIONS[this.missionIndex]; }
 
@@ -547,10 +1006,10 @@ class Game {
     for (let r=0;r<rows;r++){
       for (let c=0;c<cols;c++){
         const type = r===0 ? 2 : (r<2 ? 1 : 0);
-        this.enemies.push(new Enemy(40 + c*54, 30 + r*38, type));
+        this.enemies.push(new Enemy(40 + c*54, 30 + r*38, type, this.dailyMods.extraHp));
       }
     }
-    this.enemySpeed = 0.5 + this.missionIndex*0.2;
+    this.enemySpeed = (0.5 + this.missionIndex*0.2) * (this.dailyMods.speedMul || 1);
     this.enemyDir = 1;
   }
 
@@ -605,7 +1064,7 @@ class Game {
       }
       this.enemyTimer--;
       if (this.enemyTimer <= 0 && this.enemies.length){
-        this.enemyTimer = Math.max(25, 50 - this.missionIndex*4);
+        this.enemyTimer = Math.max(15, (50 - this.missionIndex*4) / (this.dailyMods.fireMul || 1));
         const shooter = this.enemies[Math.floor(Math.random()*this.enemies.length)];
         this.bullets.push({x:shooter.x+shooter.w/2-2, y:shooter.y+shooter.h, w:4, h:10, vy:3.2, friendly:false});
       }
@@ -624,9 +1083,9 @@ class Game {
           en.hp--;
           if (en.hp <= 0){
             en.dead = true;
-            const gain = en.type===2?30:(en.type===1?20:10);
+            const gain = Math.round((en.type===2?30:(en.type===1?20:10)) * (this.dailyMods.coreMul ? 1 : 1));
             this.score += gain;
-            totalCores += Math.ceil(gain/5);
+            totalCores += Math.ceil(gain/5 * (this.dailyMods.coreMul || 1));
             els.score.textContent = 'SCORE: ' + this.score;
             els.cores.textContent = 'CORES: ' + totalCores;
             this.addParticles(en.x+10, en.y+8, en.color, 10);
@@ -673,8 +1132,9 @@ class Game {
   defeatBoss(){
     if (!this.boss) return;
     this.addParticles(this.boss.x+32, this.boss.y+24, this.boss.color, 30);
+    const coreGain = Math.ceil(40 * (this.dailyMods.coreMul || 1));
     this.score += 150;
-    totalCores += 40;
+    totalCores += coreGain;
     els.score.textContent = 'SCORE: ' + this.score;
     els.cores.textContent = 'CORES: ' + totalCores;
     blip(120,0.4,'sawtooth');
@@ -682,6 +1142,20 @@ class Game {
     this.bullets = [];
     els.bossbar.style.display = 'none';
     els.bossname.style.display = 'none';
+
+    if (this.bossRush){
+      this.state = 'end';
+      els.endTitle.textContent = 'BOSS DEFEATED';
+      els.endText.textContent = `${this.mission.bossName} HAS FALLEN. FINAL SCORE: ${this.score}.`;
+      finishRun(this.score, this.mission.bossName + ' (Boss Rush)');
+      showOnly('end');
+      return;
+    }
+
+    if (this.dailyMods.coreMul){
+      storage.set(dailyKey, '1');
+    }
+
     this.state = 'dialogue';
     this.runDialogue(this.mission.outro, () => {
       if (this.missionIndex >= MISSIONS.length - 1){
@@ -724,12 +1198,14 @@ class Game {
     this.player.alive = false;
     els.endTitle.textContent = 'GAME OVER';
     els.endText.textContent = `RONIN WAS LOST IN ${this.mission.name}. FINAL SCORE: ${this.score}. THE COLONIES WILL REMEMBER.`;
+    finishRun(this.score, this.bossRush ? (this.mission.bossName + ' (Boss Rush)') : 'Campaign Run');
     showOnly('end');
   }
   victory(){
     this.state = 'end';
     els.endTitle.textContent = 'VICTORY';
     els.endText.textContent = `THE HIVE QUEEN HAS FALLEN. FINAL SCORE: ${this.score}. THE COLONIES ARE SAFE... FOR NOW.`;
+    finishRun(this.score, 'Campaign Victory');
     showOnly('end');
   }
 
@@ -758,6 +1234,18 @@ class Game {
       ctx.fillRect(0,0,W,H);
     }
   }
+}
+
+function finishRun(score, label){
+  const top = saveHighScore(score, label);
+  renderHighScores(document.getElementById('highScoreList'));
+  renderHighScores2(top);
+}
+function renderHighScores2(list){
+  const target = document.getElementById('endHighScorePanel');
+  target.innerHTML = '<div id="highScorePanel"><h3>TOP PILOTS</h3><ol>' +
+    list.map((e,i) => `<li><span class="nm">#${i+1} ${e.label}</span><span>${e.score}</span></li>`).join('') +
+    '</ol></div>';
 }
 
 let game = null;
@@ -799,8 +1287,17 @@ document.getElementById('resumeBtn').addEventListener('click', () => {
 });
 
 document.getElementById('restartBtn').addEventListener('click', () => {
+  renderDailyBannerRefresh();
   showOnly('start');
 });
+function renderDailyBannerRefresh(){
+  renderDailyBanner();
+}
+
+/* Prevent page scroll/bounce on mobile while playing */
+document.body.addEventListener('touchmove', e => {
+  if (game && (game.state === 'playing' || game.state === 'boss')) e.preventDefault();
+}, { passive:false });
 </script>
 </body>
 </html>
